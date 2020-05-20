@@ -111,7 +111,7 @@ class CliExecutor {
             throw new Error(util.format('Unable to execute CLI without binary: %s', this.getId()));
         }
         let values = this.values;
-        for (key in parameters) {
+        for (let key in parameters) {
             values[key] = parameters[key];
         }
         return ntUtil.exec(this.bin, this.args ? this.args : this.defaultArgs, values);
@@ -147,7 +147,7 @@ class HttpExecutor {
                 this.method = config.method;
             }
             if (config.data != undefined) {
-                for (key in config.data) {
+                for (let key in config.data) {
                     this.addDefault(key, config.data[key]);
                 }
             }
