@@ -53,6 +53,9 @@ class WebRobot {
     setup() {
         const f = () => {
             this.ready = true;
+            if (typeof this.onready == 'function') {
+                this.onready();
+            }
         }
         if (this.browser == this.FIREFOX) {
             const profile = this.getProfileDir();
