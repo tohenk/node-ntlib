@@ -188,16 +188,19 @@ class WebRobot {
                                     case tagName == 'select':
                                         this.click({el: el, data: By.xpath('//option[@value="' + data.value + '"]')})
                                             .then(() => next())
+                                            .catch((err) => reject(err))
                                         ;
                                         break;
                                     case tagName == 'input' && type == 'checkbox':
                                         this.fillCheckbox(el, data.value)
                                             .then(() => next())
+                                            .catch((err) => reject(err))
                                         ;
                                         break;
                                     default:
                                         this.fillInput(el, data.value)
                                             .then(() => next())
+                                            .catch((err) => reject(err))
                                         ;
                                         break;
                                 }
@@ -218,6 +221,7 @@ class WebRobot {
                         const el = this.findElement(submit);
                         el.click()
                             .then(() => resolve())
+                            .catch((err) => reject(err))
                         ;
                     } else {
                         resolve();
@@ -249,6 +253,7 @@ class WebRobot {
             if (el.isSelected() != value) {
                 el.click()
                     .then(() => resolve())
+                    .catch((err) => reject(err))
                 ;
             } else {
                 resolve();
@@ -298,6 +303,7 @@ class WebRobot {
                 .then((el) => {
                     el.click()
                         .then(() => resolve())
+                        .catch((err) => reject(err))
                     ;
                 })
                 .catch((err) => reject(err))
@@ -320,8 +326,10 @@ class WebRobot {
                 .then((el) => {
                     el.click()
                         .then(() => resolve())
+                        .catch((err) => reject(err))
                     ;
-                }).catch((err) => reject(err))
+                })
+                .catch((err) => reject(err))
             ;
         });
     }
