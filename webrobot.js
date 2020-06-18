@@ -37,6 +37,7 @@ class WebRobot {
         this.options = options || {};
         this.workdir = this.options.workdir || __dirname;
         this.browser = this.options.browser || this.CHROME;
+        this.session = this.options.session;
         this.url = this.options.url;
         this.timeout = this.options.timeout || 10000;
         this.wait = this.options.wait || 1000;
@@ -110,7 +111,7 @@ class WebRobot {
         if (!fs.existsSync(profiledir)) {
             fs.mkdirSync(profiledir);
         }
-        return path.join(profiledir, this.browser);
+        return path.join(profiledir, this.browser + (this.session ? '-' + this.session : ''));
     }
 
     createDriver(options) {
