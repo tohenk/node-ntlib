@@ -34,6 +34,7 @@ class Queue extends EventEmitter {
         this.queues = queues;
         this.handler = handler;
         this.check = check;
+        this.queue = null;
         this.next();
     }
 
@@ -44,8 +45,8 @@ class Queue extends EventEmitter {
     start() {
         process.nextTick(() => {
             if (this.queues.length) {
-                const queue = this.queues.shift();
-                this.emit('queue', queue);
+                this.queue = this.queues.shift();
+                this.emit('queue', this.queue);
             }
         });
     }
@@ -66,11 +67,12 @@ class Queue extends EventEmitter {
     done() {
         process.nextTick(() => {
             this.emit('done');
+            this.queue = null;
         });
     }
 
     requeue(queues) {
-        const processNext = this.queues.length == 0;
+        const processNext = this.queues.length == 0 && this.queue == null;
         Array.prototype.push.apply(this.queues, queues);
         if (processNext) this.next();
     }
