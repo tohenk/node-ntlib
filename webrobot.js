@@ -141,16 +141,21 @@ class WebRobot {
             if (this.opened && this.driver) {
                 return resolve();
             }
-            this.getDriver().get(this.url)
-                .then(() => {
-                    this.opened = true;
-                    if (this.browser == this.FIREFOX) {
-                        this.getDriver().manage().window().maximize();
-                    }
-                    resolve();
-                })
-                .catch((err) => reject(err))
-            ;
+            try {
+                this.getDriver().get(this.url)
+                    .then(() => {
+                        this.opened = true;
+                        if (this.browser == this.FIREFOX) {
+                            this.getDriver().manage().window().maximize();
+                        }
+                        resolve();
+                    })
+                    .catch((err) => reject(err))
+                ;
+            }
+            catch (err) {
+                reject(err);
+            }
         });
     }
 
