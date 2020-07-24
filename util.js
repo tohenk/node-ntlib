@@ -117,7 +117,6 @@ class AppUtil {
         args.forEach((v) => {
             translatedArgs.push(this.trans(v, values));
         });
-        console.log(translatedArgs);
         return spawn(executable, translatedArgs);
     }
 
