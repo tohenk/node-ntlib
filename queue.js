@@ -31,7 +31,7 @@ class Queue extends EventEmitter {
 
     constructor(queues, handler, check) {
         super();
-        this.queues = queues;
+        this.queues = queues || [];
         this.handler = handler;
         this.check = check;
         this.queue = null;
@@ -62,6 +62,10 @@ class Queue extends EventEmitter {
         } else {
             this.done();
         }
+    }
+
+    clear() {
+        this.queues = [];
     }
 
     done() {
