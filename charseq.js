@@ -70,7 +70,7 @@ class CharSequence {
     }
 
     eof() {
-        return this.pos > this.len;
+        return this.pos >= this.len;
     }
 
 }
