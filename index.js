@@ -30,6 +30,5 @@ module.exports = {
     Logger: require('./logger'),
     Queue: require('./queue'),
     Token: require('./token'),
-    WebRobot: require('./webrobot'),
     Work: require('./work')
 }

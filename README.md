@@ -113,18 +113,6 @@ const { AppUtil } = require('@ntlab/ntlib');
 console.log(AppUtil.trans('Translate %ME%', {ME: '123'})); // Translate 123
 ```
 
-## WebRobot, A Selenium Addons (webrobot.js)
-
-Provide a base class to extends to use Selenium for web automation.
-
-```js
-const { WebRobot } = require('@ntlab/ntlib');
-
-class MyWebRobot extends WebRobot {
-
-}
-```
-
 ## Promise Based Work Queue (work.js)
 
 Provide a queue mechanism for Promise based works.

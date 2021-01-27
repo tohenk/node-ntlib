@@ -1,6 +1,6 @@
 {
   "name": "@ntlab/ntlib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A collection of common library",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,6 @@
     "queue",
     "token",
     "utility",
-    "webrobot",
     "work",
     "queue"
   ],
@@ -29,7 +28,5 @@
     "url": "https://github.com/tohenk/node-ntlib/issues"
   },
   "homepage": "https://github.com/tohenk/node-ntlib#readme",
-  "dependencies": {
-    "selenium-webdriver": "^4.0.0-alpha.8"
-  }
+  "dependencies": {}
 }
