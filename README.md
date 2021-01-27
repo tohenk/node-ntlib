@@ -1,13 +1,12 @@
-Nodejs Library: A collection of common utility
-==============================================
+# A collection of common library
 
-Character Sequence (charseq.js)
--------------------------------
+## Character Sequence (charseq.js)
+
 
 Class to handle string as a sequence of character.
 
 ```js
-const CharSequence = require('./charseq');
+const { CharSequence } = require('@ntlab/ntlib');
 
 let charseq = new CharSequence('This is a string');
 while (!charseq.eof()) {
@@ -15,14 +14,13 @@ while (!charseq.eof()) {
 }
 ```
 
-Command Line Argument Parser (cmd.js)
--------------------------------------
+## Command Line Argument Parser (cmd.js)
 
 Provide functions to work with Command Line arguments.
 
 ```js
 const path = require('path');
-const Cmd = require('./cmd');
+const { Cmd } = require('@ntlab/ntlib');
 
 Cmd.addBool('help', 'h', 'Show program usage').setAccessible(false);
 Cmd.addVar('something', 's', 'Something description', 'some-argument');
@@ -44,12 +42,12 @@ function usage() {
 }
 ```
 
-CLI or HTTP Executor (command.js, httpcmd.js)
----------------------------------------------
+## CLI or HTTP Executor (command.js, httpcmd.js)
 
 Execute a Command Line Interface (CLI) or HTTP command.
 
 ```js
+const { CommandExecutor } = require('@ntlab/ntlib');
 const cmd = {
     bin: 'php',
     cli: 'path/to/php.file.to.execute.php',
@@ -60,7 +58,7 @@ const cmd = {
         '%DATA%'
     ]
 }
-const p = require('./command')(cmd).exec({DATA: 'some-data'});
+const p = CommandExecutor(cmd).exec({DATA: 'some-data'});
 p.on('exit', (code) => {
     /* do something on exit */
 });
@@ -72,25 +70,23 @@ p.stderr.on('data', (line) => {
 });
 ```
 
-A Simple Logger (logger.js)
----------------------------
+## A Simple Logger (logger.js)
 
 Provide a simple logger class.
 
 ```js
-const Logger = require('./logger');
+const { Logger } = require('@ntlab/ntlib');
 
 const log = new Logger('/path/to/logfile');
 log.log('Somthing to log');
 ```
 
-Queue Processing (queue.js)
----------------------------
+## Queue Processing (queue.js)
 
 Provide a queue mechanism.
 
 ```js
-const Queue = require('./queue');
+const { Queue } = require('@ntlab/ntlib');
 
 const queues = ['One', 'Two', 'Three'];
 const q = new Queue(queues, (seq) => {
@@ -99,38 +95,42 @@ const q = new Queue(queues, (seq) => {
 });
 ```
 
-Token Processing (token.js)
----------------------------
+## Token Processing (token.js)
 
 Provide an utility to parse string into tokens.
 
 ```js
-const token = require('./token');
-console.log(token.split('1, 2, (1, "ABC")')); // [1, 2, [1, "ABC"]]
+const { Token } = require('@ntlab/ntlib');
+console.log(Token.split('1, 2, (1, "ABC")')); // [1, 2, [1, "ABC"]]
 ```
 
-App Utility (util.js)
----------------------
+## App Utility (util.js)
 
 Internally used by CLI/HTTP Executor, also provide a small set of common functions.
 
 ```js
-const AppUtil = require('./util');
+const { AppUtil } = require('@ntlab/ntlib');
 console.log(AppUtil.trans('Translate %ME%', {ME: '123'})); // Translate 123
 ```
 
-WebRobot, A Selenium Addons (webrobot.js)
------------------------------------------
+## WebRobot, A Selenium Addons (webrobot.js)
 
 Provide a base class to extends to use Selenium for web automation.
 
-Promise Based Work Queue (work.js)
-----------------------------------
+```js
+const { WebRobot } = require('@ntlab/ntlib');
+
+class MyWebRobot extends WebRobot {
+
+}
+```
+
+## Promise Based Work Queue (work.js)
 
 Provide a queue mechanism for Promise based works.
 
 ```js
-const Work = require('./work');
+const { Work } = require('@ntlab/ntlib');
 Work.works([
     () => new Promise((resolve, reject) => {
         console.log('First work');
