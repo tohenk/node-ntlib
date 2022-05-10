@@ -115,18 +115,25 @@ console.log(AppUtil.trans('Translate %ME%', {ME: '123'})); // Translate 123
 
 ## Promise Based Work Queue (work.js)
 
-Provide a queue mechanism for Promise based works.
+Provide promise queue mechanism for easy chaining. It accepts a function as its
+worker. Its also accepts an array with signature of `[function, function]` which
+the first element would be the worker and the second would be a state function
+and must be evaluated to true for worker to be executed.
 
 ```js
 const { Work } = require('@ntlab/ntlib');
 Work.works([
-    () => new Promise((resolve, reject) => {
+    [w => new Promise((resolve, reject) => {
         console.log('First work');
+        resolve(false);
+    })],
+    [w => new Promise((resolve, reject) => {
+        console.log('This will be skipped');
         resolve();
-    }),
-    () => new Promise((resolve, reject) => {
-        console.log('Second work');
+    }), w => w.getRes(0)],
+    [w => new Promise((resolve, reject) => {
+        console.log('It\'s done');
         resolve();
-    })
+    })],
 ]);
 ```

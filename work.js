@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2018-2022 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 
-const EventEmitter  = require('events');
+const EventEmitter = require('events');
 
 /**
- * Promise based worker.
+ * Promise based worker for easy chaining.
  */
 class Work extends EventEmitter {
+    result = []
+    seq = null
 
     constructor(works) {
         super();
@@ -51,35 +53,103 @@ class Work extends EventEmitter {
         }
     }
 
-    static works(workers, callback) {
+    getRes(idx) {
+        if (idx < 0 || idx >= this.result.length) {
+            throw new Error('Result index is unavailable!');
+        }
+        return this.result[idx];
+    }
+
+    static works(workers, options) {
+        if (typeof options == 'undefined') {
+            options = {};
+        }
+        if (typeof options == 'function') {
+            options = {callback: options};
+        }
         const w = new this(workers);
         return new Promise((resolve, reject) => {
-            const f = (worker) => {
+            w.seq = -1;
+            // always handler, called both on resolve and on rejet
+            const always = () => {
+                if (typeof options.done == 'function') {
+                    options.done(w);
+                }
+            } 
+            // next handler or resolve when none left
+            const next = res => {
+                w.result.push(res);
+                w.pres = w.res;
+                w.res = res;
+                if (w.works.length == 0) {
+                    always(w);
+                    resolve(w.rres);
+                } else {
+                    w.once('work', f);
+                    if (typeof options.callback == 'function') {
+                        options.callback(() => w.next());
+                    } else {
+                        w.next();
+                    }
+                }
+            }
+            // on error handler
+            const stop = err => {
+                console.error(err);
+                w.err = err;
+                always(w);
+                if (options.alwaysResolved) {
+                    resolve();
+                } else {
+                    reject(err);
+                }
+            }
+            // worker main handler
+            const f = worker => {
+                let skip = false;
+                // worker signature: [work, state]
+                if (Array.isArray(worker)) {
+                    // any state?
+                    if (worker.length == 2) {
+                        if (typeof worker[1] != 'function') {
+                            return reject('Worker state must be a function!');
+                        }
+                        // state must be evaluated to true to be executed
+                        let state = worker[1](w);
+                        if (!state) {
+                            skip = true;
+                        }
+                    }
+                    worker = worker[0];
+                }
+                // worker must be function
+                if (typeof worker != 'function') {
+                    return reject('Worker must be a function!');
+                }
+                let winfo = worker.toString();
                 try {
-                    worker()
-                        .then((res) => {
-                            w.result = res;
-                            if (w.works.length == 0) {
-                                resolve(res);
-                            } else {
-                                w.once('work', f);
-                                if (typeof callback == 'function') {
-                                    callback(() => w.next());
-                                } else {
-                                    w.next();
-                                }
-                            }
-                        })
-                        .catch((err) => reject(err))
-                    ;
-                } catch(e) {
-                    reject(e);
+                    w.seq++;
+                    if (skip) {
+                        next(null);
+                    } else {
+                        worker(w)
+                            .then(res => {
+                                w.rres = res;
+                                next(res);
+                            })
+                            .catch(err => {
+                                stop(err);
+                            })
+                        ;
+                    }
+                } catch (err) {
+                    if (winfo) console.error(winfo);
+                    stop(err);
                 }
             }
             w.once('work', f);
         });
     }
-
 }
 
 module.exports = Work;
