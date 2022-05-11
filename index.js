@@ -28,7 +28,5 @@ module.exports = {
     Cmd: require('./cmd'),
     CommandExecutor: require('./command'),
     Logger: require('./logger'),
-    Queue: require('./queue'),
     Token: require('./token'),
-    Work: require('./work')
 }

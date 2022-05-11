@@ -81,20 +81,6 @@ const log = new Logger('/path/to/logfile');
 log.log('Somthing to log');
 ```
 
-## Queue Processing (queue.js)
-
-Provide a queue mechanism.
-
-```js
-const { Queue } = require('@ntlab/ntlib');
-
-const queues = ['One', 'Two', 'Three'];
-const q = new Queue(queues, (seq) => {
-    console.log(seq);
-    q.next();
-});
-```
-
 ## Token Processing (token.js)
 
 Provide an utility to parse string into tokens.
@@ -111,29 +97,4 @@ Internally used by CLI/HTTP Executor, also provide a small set of common functio
 ```js
 const { AppUtil } = require('@ntlab/ntlib');
 console.log(AppUtil.trans('Translate %ME%', {ME: '123'})); // Translate 123
-```
-
-## Promise Based Work Queue (work.js)
-
-Provide promise queue mechanism for easy chaining. It accepts a function as its
-worker. Its also accepts an array with signature of `[function, function]` which
-the first element would be the worker and the second would be a state function
-and must be evaluated to true for worker to be executed.
-
-```js
-const { Work } = require('@ntlab/ntlib');
-Work.works([
-    [w => new Promise((resolve, reject) => {
-        console.log('First work');
-        resolve(false);
-    })],
-    [w => new Promise((resolve, reject) => {
-        console.log('This will be skipped');
-        resolve();
-    }), w => w.getRes(0)],
-    [w => new Promise((resolve, reject) => {
-        console.log('It\'s done');
-        resolve();
-    })],
-]);
 ```
