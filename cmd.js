@@ -112,11 +112,11 @@ class CmdParser {
     }
 
     parse(args) {
-        args = args || process.argv.slice(2);
+        this.args = args || process.argv.slice(2);
         let err = null;
         while (true) {
-            if (!args.length) break;
-            let arg = args[0];
+            if (!this.args.length) break;
+            let arg = this.args[0];
             let param = null;
             let value = null;
             let shortparam = false;
@@ -142,22 +142,22 @@ class CmdParser {
             }
             // check the existence of parameter
             if (!this.has(param)) {
-                err = 'Unknown argument "' + param + '".';
+                err = 'Unknown option "' + param + '".';
                 break;
             }
             // validate parameter
             if (this.cmds[param]['type'] == this.PARAM_VAR && !value) {
-                err = 'Argument "' + param + '" need a value to be assigned.';
+                err = 'Option "' + param + '" need a value to be assigned.';
                 break;
             }
             if (this.cmds[param]['type'] == this.PARAM_BOOL && value) {
-                err = 'Argument "' + param + '" doesn\'t accept a value.';
+                err = 'Option "' + param + '" doesn\'t accept a value.';
                 break;
             }
             // set the value
             this.cmds[param]['value'] = value ? value : true;
             // remove processed parameter
-            args = args.slice(1);
+            this.args = this.args.slice(1);
         }
         if (err) {
             console.log(err);
