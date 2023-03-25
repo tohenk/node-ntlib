@@ -83,6 +83,10 @@ class RawString
     toString() {
         return `${this.value}`;
     }
+
+    [util.inspect.custom](depth, options, inspect) {
+        return this.toString();
+    }
 }
 
 module.exports = Stringify;

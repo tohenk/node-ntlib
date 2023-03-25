@@ -5,7 +5,7 @@
 
 Class to handle string as a sequence of character.
 
-```js
+```javascript
 const { CharSequence } = require('@ntlab/ntlib');
 
 let charseq = new CharSequence('This is a string');
@@ -18,7 +18,7 @@ while (!charseq.eof()) {
 
 Provide functions to work with Command Line arguments.
 
-```js
+```javascript
 const path = require('path');
 const { Cmd } = require('@ntlab/ntlib');
 
@@ -46,7 +46,7 @@ function usage() {
 
 Execute a Command Line Interface (CLI) or HTTP command.
 
-```js
+```javascript
 const { CommandExecutor } = require('@ntlab/ntlib');
 const cmd = {
     bin: 'php',
@@ -74,18 +74,31 @@ p.stderr.on('data', (line) => {
 
 Provide a simple logger class.
 
-```js
+```javascript
 const { Logger } = require('@ntlab/ntlib');
 
 const log = new Logger('/path/to/logfile');
 log.log('Somthing to log');
 ```
 
+## Stringify (stringify.js)
+
+Convert javascript object to string.
+
+```javascript
+const { Stringify } = require('@ntlab/ntlib');
+
+log.log(Stringify.from({
+    message: 'message',
+    raw: Stringify.raw('`string`'),
+}));
+```
+
 ## Token Processing (token.js)
 
 Provide an utility to parse string into tokens.
 
-```js
+```javascript
 const { Token } = require('@ntlab/ntlib');
 console.log(Token.split('1, 2, (1, "ABC")')); // [1, 2, [1, "ABC"]]
 ```
@@ -94,7 +107,7 @@ console.log(Token.split('1, 2, (1, "ABC")')); // [1, 2, [1, "ABC"]]
 
 Internally used by CLI/HTTP Executor, also provide a small set of common functions.
 
-```js
+```javascript
 const { AppUtil } = require('@ntlab/ntlib');
 console.log(AppUtil.trans('Translate %ME%', {ME: '123'})); // Translate 123
 ```
