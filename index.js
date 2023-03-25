@@ -28,5 +28,6 @@ module.exports = {
     Cmd: require('./cmd'),
     CommandExecutor: require('./command'),
     Logger: require('./logger'),
+    Stringify: require('./stringify'),
     Token: require('./token'),
 }
