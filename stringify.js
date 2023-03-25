@@ -65,8 +65,23 @@ class Stringify {
         });
     }
 
+    static raw(value) {
+        return new RawString(value);
+    }
+
     static get size() {
         return 4;
+    }
+}
+
+class RawString
+{
+    constructor(value) {
+        this.value = value;
+    }
+
+    toString() {
+        return `${this.value}`;
     }
 }
 
