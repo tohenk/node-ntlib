@@ -24,6 +24,7 @@
 
 module.exports = {
     AppUtil: require('./util'),
+    Beautify: require('./beautify'),
     CharSequence: require('./charseq'),
     Cmd: require('./cmd'),
     CommandExecutor: require('./command'),

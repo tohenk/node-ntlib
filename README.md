@@ -1,7 +1,19 @@
 # A collection of common library
 
-## Character Sequence (charseq.js)
+## Beautify (beautify.js)
 
+Beautify a text.
+
+```javascript
+const { Beautify } = require('@ntlab/ntlib');
+
+console.log(Beautify.beautify('this is the message')); // This Is The Message
+
+Beautify.exceptions.add('is');
+console.log(Beautify.beautify('THIS IS THE MESSAGE')); // This is The Message
+```
+
+## Character Sequence (charseq.js)
 
 Class to handle string as a sequence of character.
 
@@ -88,10 +100,10 @@ Convert javascript object to string.
 ```javascript
 const { Stringify } = require('@ntlab/ntlib');
 
-log.log(Stringify.from({
+console.log(Stringify.from({
     message: 'message',
     raw: Stringify.raw('`string`'),
-}));
+})); // {message: 'message', raw: `string`}
 ```
 
 ## Token Processing (token.js)
