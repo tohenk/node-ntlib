@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2016-2024 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -36,37 +36,38 @@ class Token {
     }
 
     split(str, options) {
-        const result = this.doSplit(str, options);
-        return result.tokens;
+        return this.doSplit(str, options).tokens;
     }
 
     doSplit(str, options) {
         options = options || {};
         const tokens = [];
-        const delimeter = options.delimeter != undefined ? options.delimeter : this.SEP;
-        const throwError = options.throwError != undefined ? options.throwError : false;
-        const stopChar = options.stopChar != undefined ? options.stopChar : null;
-        let i = 0, j = str.length - 1, cnt = 0, p = 0, s = 0;
+        const delimeter = options.delimeter !== undefined ? options.delimeter : this.SEP;
+        const throwError = options.throwError !== undefined ? options.throwError : false;
+        const stopChar = options.stopChar !== undefined ? options.stopChar : null;
+        let i = 0, j = str.length - 1, p = 0, s = 0;
         let started = false, enclosed = false, quoted = false, stopped = false;
         let lastchar = null, part = null;
         // s => the start position of next check
         // p => the last position of checked
         // i => the start position of checked
         const next = () => {
-            if (null == stopChar) {
+            if (null === stopChar) {
                 p = str.indexOf(delimeter, s);
-                if (p < 0) p = j + 1;
+                if (p < 0) {
+                    p = j + 1;
+                }
             } else {
                 while (true) {
-                    if (p > j) break;
-                    if (str.charAt(p) == delimeter) break;
-                    if (str.charAt(p) == stopChar) break;
+                    if (p > j || str.charAt(p) === delimeter || str.charAt(p) === stopChar) {
+                        break;
+                    }
                     p++;
                 }
             }
         }
         const add = () => {
-            if (null == part) {
+            if (null === part) {
                 part = str.substr(i, p - i);
                 if (quoted) {
                     part = part.replace(this.Q + this.Q, this.Q);
@@ -79,12 +80,14 @@ class Token {
                     }
                 }
             }
-            if (typeof part == 'string' && part.length == 0) part = undefined;
+            if (typeof part === 'string' && part.length === 0) {
+                part = undefined;
+            }
             tokens.push(part);
         }
         while (true) {
             if (i > j || stopped) {
-                if (lastchar == delimeter) {
+                if (lastchar === delimeter) {
                     if (throwError) {
                         throw new Error('Missing token at end: ' + str);
                     } else {
@@ -94,14 +97,16 @@ class Token {
                 break;
             }
             if (!started) {
-                stopped = null != stopChar && str.charAt(i) == stopChar ? true : false;
+                stopped = null !== stopChar && str.charAt(i) === stopChar ? true : false;
                 if (stopped) {
                     s = i;
                     continue;
                 }
-                enclosed = str.charAt(i) == '(';
-                quoted = str.charAt(i) == this.Q;
-                if (enclosed || quoted) i++;
+                enclosed = str.charAt(i) === '(';
+                quoted = str.charAt(i) === this.Q;
+                if (enclosed || quoted) {
+                    i++;
+                }
                 s = i;
                 p = s;
                 started = true;
@@ -119,12 +124,12 @@ class Token {
                                 break;
                             }
                         }
-                        if (p == j) {
+                        if (p === j) {
                             break;
                         }
                         // check for quote escape
                         if (p < j) {
-                            if (str.charAt(p + 1) != this.Q) {
+                            if (str.charAt(p + 1) !== this.Q) {
                                 // not a quote escape
                                 break;
                             } else {
@@ -135,20 +140,28 @@ class Token {
                     }
                 }
                 if (enclosed) {
-                    let result = this.doSplit(str.substr(s), {delimeter: delimeter, throwError: throwError, stopChar: ')'});
+                    const result = this.doSplit(str.substr(s), {delimeter: delimeter, throwError: throwError, stopChar: ')'});
                     part = result.tokens;
                     p = s + result.position + 1;
-                    while (str.charAt(p + 1) == delimeter) p++;
+                    while (str.charAt(p + 1) === delimeter) {
+                        p++;
+                    }
                 }
-                if (!quoted && !enclosed) next();
+                if (!quoted && !enclosed) {
+                    next();
+                }
                 add();
                 // p now equal to delimeter
                 lastchar = str.charAt(p);
                 i = p;
                 started = false;
-                if (null !== stopChar && lastchar == stopChar) continue;
+                if (null !== stopChar && lastchar === stopChar) {
+                    continue;
+                }
                 i++;
-                while (str.charAt(i) == ' ') i++;
+                while (str.charAt(i) === ' ') {
+                    i++;
+                }
             }
         }
         return {
@@ -156,7 +169,6 @@ class Token {
             position: i
         }
     }
-
 }
 
 module.exports = new Token();

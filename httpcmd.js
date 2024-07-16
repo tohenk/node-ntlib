@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2017-2024 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -30,16 +30,9 @@ const args = process.argv.slice(2);
 const data = JSON.parse(args[0]);
 
 if (data.url) {
-    const url = require('url').parse(data.url);
-    const http = require('https:' == url.protocol ? 'https' : 'http');
-    let method = data.method || 'GET';
-    let contentType = data.contentType || 'application/x-www-form-urlencoded';
-    const options = {
-        hostname: url.hostname,
-        path: url.path,
-        method: method.toUpperCase()
-    }
-    let content;
+    let content, headers, done = false;
+    const method = data.method || 'GET';
+    const contentType = data.contentType || 'application/x-www-form-urlencoded';
     switch (contentType) {
         case 'application/x-www-form-urlencoded':
             content = require('querystring').stringify(data.params);
@@ -49,7 +42,7 @@ if (data.url) {
             break;
     }
     if (content) {
-        options.headers = {
+        headers = {
             'Content-Type': contentType,
             'Content-Length': Buffer.byteLength(content)
         }
@@ -57,33 +50,69 @@ if (data.url) {
     console.log('URL: %s', data.url);
     console.log('METHOD: %s', method.toUpperCase());
     console.log('DATA: %s', content);
-    let response = null;
-    const req = http.request(options, (res) => {
-        res.setEncoding('utf8');
-        res.on('data', (chunk) => {
-            if (null == response) {
-                response = chunk;
-            } else {
-                response = response + chunk;
+    const f = () => {
+        let result, rcode, rheaders, err;
+        const url = require('url').parse(data.url);
+        const http = require('https:' === url.protocol ? 'https' : 'http');
+        const options = {
+            hostname: url.hostname,
+            path: url.path,
+            method: method.toUpperCase()
+        }
+        if (headers) {
+            options.headers = headers;
+        }
+        const req = http.request(options, res => {
+            rcode = res.statusCode;
+            rheaders = res.headers;
+            res.setEncoding('utf8');
+            res.on('data', chunk => {
+                if (typeof chunk === 'string') {
+                    chunk = Buffer.from(chunk, 'utf8');
+                }
+                if (result === undefined) {
+                    result = chunk;
+                } else {
+                    result = Buffer.concat([result, chunk]);
+                }
+            });
+            res.on('end', () => {
+                if (rcode === 301 || rcode === 302) {
+                    if (res.headers.location) {
+                        data.url = res.headers.location;
+                    } else {
+                        console.error('No redirection to follow!');
+                    }
+                } else {
+                    done = true;
+                }
+            });
+        });
+        req.on('error', e => {
+            err = e;
+            console.error('Error: %s', e.message);
+        });
+        req.on('close', () => {
+            if (!err) {
+                if (done) {
+                    console.log('STATUS: %s', rcode);
+                    console.log('HEADERS: %s', JSON.stringify(rheaders));
+                    console.log('BODY: %s', result);
+                    if (typeof result === 'string' && rheaders['content-type'] &&
+                        /^application\/json/.test(rheaders['content-type'])) {
+                        result = JSON.parse(result);
+                    }
+                    process.send(result);
+                } else {
+                    f();
+                }
             }
         });
-        res.on('end', () => {
-            console.log('STATUS: %s', res.statusCode);
-            console.log('HEADERS: %s', JSON.stringify(res.headers));
-            console.log('BODY: %s', response);
-            contentType = res.headers['content-type'];
-            if (/^application\/json/.test(contentType)) {
-                response = JSON.parse(response);
-            }
-            process.send(response);
-        });
-    });
-    req.on('error', (e) => {
-        console.error('Error: %s', e.message);
-    });
-    // write data to request body
-    if (content.length) {
-        req.write(content);
+        // write data to request body
+        if (content) {
+            req.write(content);
+        }
+        req.end();
     }
-    req.end();
+    f();
 }

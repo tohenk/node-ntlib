@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2016-2024 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,15 +26,14 @@
  * Command Executor
  */
 
-const path   = require('path');
-const util   = require('util');
-const fork   = require('child_process').fork;
-const ntUtil = require('./util');
+const path = require('path');
+const fork = require('child_process').fork;
+const util = require('./util');
 
 function CommandExecutor(cmd, options) {
-    let isHttp = cmd.url != undefined;
-    if (!isHttp && typeof cmd == 'string' &&
-        (cmd.indexOf('http://') == 0 || cmd.indexOf('https://') == 0)) {
+    let isHttp = cmd.url !== undefined;
+    if (!isHttp && typeof cmd === 'string' &&
+        (cmd.indexOf('http://') === 0 || cmd.indexOf('https://') === 0)) {
         isHttp = true;
     }
     if (isHttp) {
@@ -47,31 +46,26 @@ function CommandExecutor(cmd, options) {
 class CliExecutor {
 
     bin = null
+    env = null
     args = null
     defaultArgs = []
     values = []
     paths = []
 
     constructor(config, options) {
-        if (options.paths != undefined) {
-            if (Array.isArray(options.paths)) {
-                for (let i = 0; i < options.paths.length; i++) {
-                    this.addPath(options.paths[i]);
-                }
+        if (Array.isArray(options.paths)) {
+            for (const p of options.paths) {
+                this.addPath(p);
             }
         }
-        if (options.args != undefined) {
-            if (Array.isArray(options.args)) {
-                for (let i = 0; i < options.args.length; i++) {
-                    this.addDefaultArg(options.args[i]);
-                }
+        if (Array.isArray(options.args)) {
+            for (const arg of options.args) {
+                this.addDefaultArg(arg);
             }
         }
-        if (options.values != undefined) {
-            if (typeof options.values == 'object') {
-                for (let key in options.values) {
-                    this.addValue(key, options.values[key]);
-                }
+        if (typeof options.values === 'object') {
+            for (const key in options.values) {
+                this.addValue(key, options.values[key]);
             }
         }
         this.init(config);
@@ -79,14 +73,23 @@ class CliExecutor {
 
     init(config) {
         // config is cli itself
-        if (typeof config == 'string') {
+        if (typeof config === 'string') {
             this.values.CLI = this.findCLI(config);
         }
         // config is array (bin, cli, and args)
-        if (typeof config == 'object') {
-            if (config.bin) this.bin = config.bin;
-            if (config.cli) this.values.CLI = this.findCLI(config.cli);
-            if (config.args != undefined) this.args = Array.from(config.args);
+        if (typeof config === 'object') {
+            if (config.bin) {
+                this.bin = config.bin;
+            }
+            if (config.cli) {
+                this.values.CLI = this.findCLI(config.cli);
+            }
+            if (config.args !== undefined) {
+                this.args = Array.from(config.args);
+            }
+            if (typeof config.env === 'object') {
+                this.env = config.env;
+            }
         }
     }
 
@@ -103,18 +106,18 @@ class CliExecutor {
     }
 
     findCLI(cli) {
-        return ntUtil.findCLI(path.normalize(cli), this.paths);
+        return util.findCLI(path.normalize(cli), this.paths);
     }
 
     exec(parameters) {
         if (!this.bin) {
-            throw new Error(util.format('Unable to execute CLI without binary: %s', this.getId()));
+            throw new Error(`Unable to execute CLI without binary: ${this.getId()}`);
         }
-        let values = this.values;
-        for (let key in parameters) {
+        const values = this.values;
+        for (const key in parameters) {
             values[key] = parameters[key];
         }
-        return ntUtil.exec(this.bin, this.args ? this.args : this.defaultArgs, values);
+        return util.exec(this.bin, this.args ? this.args : this.defaultArgs, values, this.env);
     }
 
     getId() {
@@ -137,7 +140,7 @@ class HttpExecutor {
     }
 
     init(config) {
-        if (typeof config == 'string') {
+        if (typeof config === 'string') {
             this.url = config;
         } else {
             if (config.url) {
@@ -146,8 +149,8 @@ class HttpExecutor {
             if (config.method) {
                 this.method = config.method;
             }
-            if (config.data != undefined) {
-                for (let key in config.data) {
+            if (config.data !== undefined) {
+                for (const key in config.data) {
                     this.addDefault(key, config.data[key]);
                 }
             }
@@ -160,10 +163,10 @@ class HttpExecutor {
 
     exec(parameters) {
         const params = {};
-        for (let key in this.defaults) {
-            params[key] = ntUtil.trans(this.defaults[key], parameters);
+        for (const key in this.defaults) {
+            params[key] = util.trans(this.defaults[key], parameters);
         }
-        return fork(__dirname + path.sep + 'httpcmd', [JSON.stringify({
+        return fork(path.join(__dirname, 'httpcmd'), [JSON.stringify({
             url: this.url,
             method: this.method || 'get',
             params: params
@@ -173,7 +176,6 @@ class HttpExecutor {
     getId() {
         return this.url;
     }
-
 }
 
 module.exports = CommandExecutor;

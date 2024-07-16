@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2018-2024 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-const fs        = require('fs');
-const util      = require('util');
-const ntUtil    = require('./util');
+const fs = require('fs');
+const formatter = require('util').format;
+const util = require('./util');
 
 /**
  * A simple logger.
@@ -49,9 +49,9 @@ class Logger {
             this.rotate(time)
                 .then(() => {
                     if (args.length) {
-                        args[0] = ntUtil.formatDate(time, this.dateFormat) + ' ' + args[0];
+                        args[0] = util.formatDate(time, this.dateFormat) + ' ' + args[0];
                     }
-                    const message = util.format.apply(null, args);
+                    const message = formatter.apply(null, args);
                     this.logger.log(message);
                     resolve(message);
                 })
@@ -60,26 +60,28 @@ class Logger {
     }
 
     rotate(time) {
-        if (time == undefined) {
+        if (time === undefined) {
             time = new Date();
         }
         if (!this.time) {
             const info = fs.statSync(this.logfile);
             this.time = new Date(info.mtime);
         }
-        if (time.getDate() != this.time.getDate()) {
+        if (time.getDate() !== this.time.getDate()) {
             this.time = time;
             return new Promise((resolve, reject) => {
                 let filename;
                 let seq = 0;
                 while (true) {
-                    filename = util.format('%s.%d', this.logfile, seq++);
+                    filename = this.logfile + '.' + seq++;
                     if (!fs.existsSync(filename)) {
                         break;
                     }
                 }
-                fs.rename(this.logfile, filename, (err) => {
-                    if (err) return reject(err);
+                fs.rename(this.logfile, filename, err => {
+                    if (err) {
+                        return reject(err);
+                    }
                     this.create();
                     resolve();
                 });
@@ -88,7 +90,6 @@ class Logger {
             return Promise.resolve();
         }
     }
-
 }
 
 module.exports = Logger;

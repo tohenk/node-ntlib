@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2016-2024 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -74,15 +74,17 @@ class CmdParser {
     }
 
     hasShort(shortname) {
-        for (let name in this.cmds) {
-            if (this.cmds[name]['shortname'] == shortname) return name;
+        for (const name in this.cmds) {
+            if (this.cmds[name]['shortname'] === shortname) {
+                return name;
+            }
         }
     }
 
     dump() {
         let str, len = 0, _res = [], _cmds = [], _descs = [];
-        for (let name in this.cmds) {
-            let cmd = this.cmds[name];
+        for (const name in this.cmds) {
+            const cmd = this.cmds[name];
             if (!cmd.accessible) continue;
             str = this.cmdstr(cmd, false);
             if (cmd.shortname) {
@@ -105,7 +107,7 @@ class CmdParser {
 
     cmdstr(cmd, shortCmd) {
         let str = shortCmd ? '-' + cmd.shortname : '--' + cmd.name;
-        if (cmd.type == this.PARAM_VAR) {
+        if (cmd.type === this.PARAM_VAR) {
             str += '=' + (cmd.varname ? cmd.varname : cmd.name);
         }
         return str; 
@@ -115,21 +117,25 @@ class CmdParser {
         this.args = args || process.argv.slice(2);
         let err = null;
         while (true) {
-            if (!this.args.length) break;
-            let arg = this.args[0];
+            if (!this.args.length) {
+                break;
+            }
+            const arg = this.args[0];
             let param = null;
             let value = null;
             let shortparam = false;
             // check for long parameter format
-            if ('--' == arg.substr(0, 2)) {
+            if ('--' === arg.substr(0, 2)) {
                 param = arg.substr(2);
             // check for short parameter format
-            } else if ('-' == arg.substr(0, 1)) {
+            } else if ('-' === arg.substr(0, 1)) {
                 param = arg.substr(1);
                 shortparam = true;
             }
             // not parameter, just give up
-            if (!param) break;
+            if (!param) {
+                break;
+            }
             // check for parameter separator
             if (param.indexOf('=') > 0) {
                 value = param.substr(param.indexOf('=') + 1);
@@ -137,8 +143,10 @@ class CmdParser {
             }
             // try to get the standard parameter name
             if (shortparam) {
-                let longname = this.hasShort(param);
-                if (longname) param = longname;
+                const longname = this.hasShort(param);
+                if (longname) {
+                    param = longname;
+                }
             }
             // check the existence of parameter
             if (!this.has(param)) {
@@ -146,11 +154,11 @@ class CmdParser {
                 break;
             }
             // validate parameter
-            if (this.cmds[param]['type'] == this.PARAM_VAR && !value) {
+            if (this.cmds[param]['type'] === this.PARAM_VAR && !value) {
                 err = 'Option "' + param + '" need a value to be assigned.';
                 break;
             }
-            if (this.cmds[param]['type'] == this.PARAM_BOOL && value) {
+            if (this.cmds[param]['type'] === this.PARAM_BOOL && value) {
                 err = 'Option "' + param + '" doesn\'t accept a value.';
                 break;
             }
@@ -165,7 +173,6 @@ class CmdParser {
         }
         return err ? false : true;
     }
-
 }
 
 module.exports = new CmdParser();
