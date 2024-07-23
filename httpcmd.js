@@ -98,8 +98,7 @@ if (data.url) {
                     console.log('STATUS: %s', rcode);
                     console.log('HEADERS: %s', JSON.stringify(rheaders));
                     console.log('BODY: %s', result);
-                    if (typeof result === 'string' && rheaders['content-type'] &&
-                        /^application\/json/.test(rheaders['content-type'])) {
+                    if (rheaders['content-type'] && /^application\/json/.test(rheaders['content-type'])) {
                         result = JSON.parse(result);
                     }
                     process.send(result);
