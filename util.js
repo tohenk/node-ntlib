@@ -137,6 +137,11 @@ class AppUtil {
         if (typeof env === 'object') {
             options.env = Object.assign({}, process.env, env);
         }
+        if (process.platform === 'win32') {
+            if (executable.endsWith('.bat') || executable.endsWith('.cmd')) {
+                options.shell = true;
+            }
+        }
         return spawn(executable, translatedArgs, options);
     }
 }
