@@ -52,7 +52,7 @@ if (data.url) {
     console.log('DATA: %s', content);
     const f = () => {
         let result, rcode, rheaders, err;
-        const url = require('url').parse(data.url);
+        const url = new URL(data.url);
         const http = require('https:' === url.protocol ? 'https' : 'http');
         const options = {
             hostname: url.hostname,
