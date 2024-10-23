@@ -56,7 +56,7 @@ if (data.url) {
         const http = require('https:' === url.protocol ? 'https' : 'http');
         const options = {
             hostname: url.hostname,
-            path: url.path,
+            path: url.pathname,
             method: method.toUpperCase()
         }
         if (headers) {
