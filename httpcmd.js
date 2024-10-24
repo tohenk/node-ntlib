@@ -30,8 +30,8 @@ const args = process.argv.slice(2);
 const data = JSON.parse(args[0]);
 
 if (data.url) {
-    let content, headers, done = false;
-    const method = data.method || 'GET';
+    let url, content, headers, done = false;
+    const method = (data.method || 'GET').toUpperCase();
     const contentType = data.contentType || 'application/x-www-form-urlencoded';
     switch (contentType) {
         case 'application/x-www-form-urlencoded':
@@ -48,21 +48,36 @@ if (data.url) {
         }
     }
     console.log('URL: %s', data.url);
-    console.log('METHOD: %s', method.toUpperCase());
+    console.log('METHOD: %s', method);
     console.log('DATA: %s', content);
     const f = () => {
+        url = new URL(data.url);
+        process.once('message', data => {
+            if (typeof data === 'object' && data.cookie) {
+                if (!headers) {
+                    headers = {};
+                }
+                const cookie = Array.isArray(data.cookie) ? data.cookie : [data.cookie];
+                headers.Cookie = cookie.join('; ');
+                console.log(`COOKIE: %s`, headers.Cookie);
+            }
+        });
+        process.send({cmd: 'get-cookie', domain: url.hostname, path: url.pathname}, err => {
+            if (err) {
+                console.error(err);
+            } else {
+                setTimeout(() => r(), 50);
+            }
+        });
+    }
+    const r = () => {
         let result, rcode, rheaders, err;
-        const url = new URL(data.url);
         const http = require('https:' === url.protocol ? 'https' : 'http');
-        const options = {
-            hostname: url.hostname,
-            path: url.pathname,
-            method: method.toUpperCase()
-        }
+        const options = {method};
         if (headers) {
             options.headers = headers;
         }
-        const req = http.request(options, res => {
+        const req = http.request(data.url, options, res => {
             rcode = res.statusCode;
             rheaders = res.headers;
             res.setEncoding('utf8');
@@ -78,13 +93,49 @@ if (data.url) {
             });
             res.on('end', () => {
                 if (rcode === 301 || rcode === 302) {
-                    if (res.headers.location) {
-                        data.url = res.headers.location;
+                    if (rheaders.location) {
+                        data.url = rheaders.location;
                     } else {
                         console.error('No redirection to follow!');
                     }
+                    if (headers && headers.Cookie) {
+                        delete headers.Cookie;
+                    }
                 } else {
                     done = true;
+                }
+                if (rheaders['set-cookie']) {
+                    const cookies = {};
+                    for (const cookie of rheaders['set-cookie']) {
+                        let cookiePath;
+                        const cookieNames = {};
+                        for (const a of cookie.split(';').map(a => a.trim())) {
+                            const [k, v] = a.split('=');
+                            switch (k) {
+                                case 'path':
+                                    cookiePath = v;
+                                    break;
+                                case 'domain':
+                                    break;
+                                default:
+                                    cookieNames[k] = v;
+                            }
+                        }
+                        if (cookiePath && Object.keys(cookieNames).length) {
+                            if (!cookies[cookiePath]) {
+                                cookies[cookiePath] = {};
+                            }
+                            Object.assign(cookies[cookiePath], cookieNames);
+                        }
+                    }
+                    if (Object.keys(cookies).length) {
+                        /**
+                         * {
+                         *   '/': {Cookie1: 'Value1', Cookie2: 'Value2'
+                         * }
+                         */
+                        process.send({cmd: 'set-cookie', domain: url.hostname, cookie: cookies});
+                    }
                 }
             });
         });
