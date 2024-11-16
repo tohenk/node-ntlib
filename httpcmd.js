@@ -30,7 +30,11 @@ const args = process.argv.slice(2);
 const data = JSON.parse(args[0]);
 
 if (data.url) {
-    let url, content, headers, done = false;
+    let url, content, done = false;
+    const headers = {
+        'user-agent': `Node ${process.version}`,
+        accept: '*/*',
+    }
     const method = (data.method || 'GET').toUpperCase();
     const contentType = data.contentType || 'application/x-www-form-urlencoded';
     switch (contentType) {
@@ -42,24 +46,21 @@ if (data.url) {
             break;
     }
     if (content) {
-        headers = {
-            'Content-Type': contentType,
-            'Content-Length': Buffer.byteLength(content)
-        }
+        headers['content-type'] = contentType;
+        headers['content-length'] = Buffer.byteLength(content);
     }
     console.log('URL: %s', data.url);
     console.log('METHOD: %s', method);
     console.log('DATA: %s', content);
     const f = () => {
         url = new URL(data.url);
+        headers.origin = url.origin;
+        headers.referer = url.origin;
         process.once('message', data => {
             if (typeof data === 'object' && data.cookie) {
-                if (!headers) {
-                    headers = {};
-                }
                 const cookie = Array.isArray(data.cookie) ? data.cookie : [data.cookie];
-                headers.Cookie = cookie.join('; ');
-                console.log(`COOKIE: %s`, headers.Cookie);
+                headers.cookie = cookie.join('; ');
+                console.log(`COOKIE: %s`, headers.cookie);
             }
         });
         process.send({cmd: 'get-cookie', domain: url.hostname, path: url.pathname}, err => {
@@ -73,11 +74,8 @@ if (data.url) {
     const r = () => {
         let result, rcode, rheaders, err;
         const http = require('https:' === url.protocol ? 'https' : 'http');
-        const options = {method};
-        if (headers) {
-            options.headers = headers;
-        }
-        const req = http.request(data.url, options, res => {
+        const options = {method, headers};
+        const req = http.request(url, options, res => {
             rcode = res.statusCode;
             rheaders = res.headers;
             res.setEncoding('utf8');
@@ -98,8 +96,8 @@ if (data.url) {
                     } else {
                         console.error('No redirection to follow!');
                     }
-                    if (headers && headers.Cookie) {
-                        delete headers.Cookie;
+                    if (headers.cookie) {
+                        delete headers.cookie;
                     }
                 } else {
                     done = true;
