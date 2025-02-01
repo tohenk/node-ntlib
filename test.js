@@ -25,9 +25,18 @@ const test = require('node:test');
 const Stringify = require('./stringify');
 
 test('stringify', async (t) => {
+    await t.test('can handle non object', () => {
+        assert.strictEqual(Stringify.from(true), 'true');
+        assert.strictEqual(Stringify.from(99), '99');
+        assert.strictEqual(Stringify.from('test'), `'test'`);
+    });
     await t.test('can handle null and undefined', () => {
-        const o = {a: null, b: undefined};
-        assert.strictEqual(Stringify.from(o), '{ a: null, b: undefined }');
+        assert.strictEqual(Stringify.from(null), 'null');
+        assert.strictEqual(Stringify.from(undefined), 'undefined');
+    });
+    await t.test('can handle array object', () => {
+        const a = ['one', 'two', {a: 'a', fn() {}}];
+        assert.strictEqual(Stringify.from(a), '[ \'one\', \'two\', { a: \'a\', fn() {} } ]');
     });
     await t.test('can handle string representation of inlined object', () => {
         const o = {fn: function() {}, test: 'test'};

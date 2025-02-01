@@ -63,22 +63,33 @@ class Stringify {
     /**
      * Normalize function in object as its string representation.
      *
-     * @param {object} object Object to normalize
-     * @returns {object}
+     * @param {any} object Object to normalize
+     * @returns {any}
      */
     static normalize(object) {
-        const result = {};
-        for (const k of Object.keys(object)) {
-            let v = object[k];
-            if (v !== null && v !== undefined) {
-                if (typeof v === 'object' && !(v instanceof RawString)) {
-                    v = this.normalize(v);
+        let result;
+        if (object !== null && object !== undefined && typeof object === 'object') {
+            const f = v => {
+                if (v !== null && v !== undefined) {
+                    if (typeof v === 'object' && !(v instanceof RawString)) {
+                        v = this.normalize(v);
+                    }
+                    if (typeof v === 'function') {
+                        v = this.raw(this.unIndent(v.toString()));
+                    }
                 }
-                if (typeof v === 'function') {
-                    v = this.raw(this.unIndent(v.toString()));
+                return v;
+            }
+            if (Array.isArray(object)) {
+                result = object.map(v => f(v));
+            } else {
+                result = Object.assign({}, object);
+                for (const k of Object.keys(result)) {
+                    result[k] = f(result[k]);
                 }
             }
-            result[k] = v;
+        } else {
+            result = object;
         }
 
         return result;
@@ -88,22 +99,32 @@ class Stringify {
      * Normalize function constructor to `fn()`.
      *
      * @param {string[]} lines Exploded object string representation
-     * @param {object} ref Object reference for function
+     * @param {any} ref Reference for function
      * @returns {string[]}
      */
     static normalizeFn(lines, ref) {
         const functions = [];
         (function f(o) {
-            for (const k of Object.keys(o)) {
-                const v = o[k];
-                if (v !== null && v !== undefined && typeof v === 'object') {
-                    if (v instanceof RawString) {
-                        const fn = v.toString();
-                        if (fn.startsWith(`${k}(`) || fn.startsWith('function(')) {
-                            functions.push({name: k, fn})
+            if (o !== null && o !== undefined && typeof o === 'object') {
+                const ff = (k, v) => {
+                    if (v !== null && v !== undefined && typeof v === 'object') {
+                        if (v instanceof RawString) {
+                            const fn = v.toString();
+                            if (fn.startsWith(`${k}(`) || fn.startsWith('function(')) {
+                                functions.push({name: k, fn})
+                            }
+                        } else {
+                            f(v);
                         }
-                    } else {
+                    }
+                }
+                if (Array.isArray(o)) {
+                    for (const v of o) {
                         f(v);
+                    }
+                } else {
+                    for (const k of Object.keys(o)) {
+                        ff(k, o[k]);
                     }
                 }
             }
