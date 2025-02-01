@@ -25,11 +25,15 @@ const test = require('node:test');
 const Stringify = require('./stringify');
 
 test('stringify', async (t) => {
-    await t.test('string representation of inlined object', () => {
+    await t.test('can handle null and undefined', () => {
+        const o = {a: null, b: undefined};
+        assert.strictEqual(Stringify.from(o), '{ a: null, b: undefined }');
+    });
+    await t.test('can handle string representation of inlined object', () => {
         const o = {fn: function() {}, test: 'test'};
         assert.strictEqual(Stringify.from(o), '{ fn() {}, test: \'test\' }');
     });
-    await t.test('string representation of multi line object', () => {
+    await t.test('can handle string representation of multi line object', () => {
         const o = {
             raw: Stringify.raw('`raw`'),
             test: function() {

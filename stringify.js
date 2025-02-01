@@ -70,11 +70,13 @@ class Stringify {
         const result = {};
         for (const k of Object.keys(object)) {
             let v = object[k];
-            if (typeof v === 'object' && !(v instanceof RawString)) {
-                v = this.normalize(v);
-            }
-            if (typeof v === 'function') {
-                v = this.raw(this.unIndent(v.toString()));
+            if (v !== null && v !== undefined) {
+                if (typeof v === 'object' && !(v instanceof RawString)) {
+                    v = this.normalize(v);
+                }
+                if (typeof v === 'function') {
+                    v = this.raw(this.unIndent(v.toString()));
+                }
             }
             result[k] = v;
         }
@@ -94,7 +96,7 @@ class Stringify {
         (function f(o) {
             for (const k of Object.keys(o)) {
                 const v = o[k];
-                if (typeof v === 'object') {
+                if (v !== null && v !== undefined && typeof v === 'object') {
                     if (v instanceof RawString) {
                         const fn = v.toString();
                         if (fn.startsWith(`${k}(`) || fn.startsWith('function(')) {
