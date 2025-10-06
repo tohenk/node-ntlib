@@ -38,7 +38,7 @@ class Logger {
     }
 
     create() {
-        this.stdout = new fs.createWriteStream(this.logfile, {flags: 'a'});
+        this.stdout = fs.createWriteStream(this.logfile, {flags: 'a'});
         this.logger = new console.Console(this.stdout);
     }
 
@@ -63,11 +63,11 @@ class Logger {
         if (time === undefined) {
             time = new Date();
         }
-        if (!this.time) {
+        if (!this.time && fs.existsSync(this.logfile)) {
             const info = fs.statSync(this.logfile);
             this.time = new Date(info.mtime);
         }
-        if (time.getDate() !== this.time.getDate()) {
+        if (this.time && time.getDate() !== this.time.getDate()) {
             this.time = time;
             return new Promise((resolve, reject) => {
                 let filename;
