@@ -23,7 +23,6 @@
  */
 
 const fs = require('fs');
-const formatter = require('util').format;
 const util = require('./util');
 
 /**
@@ -32,33 +31,61 @@ const util = require('./util');
 class Logger {
 
     constructor(filename) {
+        /** @type {string} */
         this.logfile = filename;
+        /** @type {string} */
         this.dateFormat = 'dd-MM HH:mm:ss.zzz';
+        /** @type {string|string[]} */
+        this.tag;
         this.create();
     }
 
+    /**
+     * Create logger console.
+     *
+     * @returns {void}
+     */
     create() {
         this.stdout = fs.createWriteStream(this.logfile, {flags: 'a'});
         this.logger = new console.Console(this.stdout);
     }
 
-    log() {
-        const args = Array.from(arguments);
+    /**
+     * Log messages.
+     *
+     * @param  {...any} args Arguments
+     * @returns {Promise<boolean>}
+     */
+    log(...args) {
         const time = new Date();
         return new Promise((resolve, reject) => {
             this.rotate(time)
                 .then(() => {
-                    if (args.length) {
-                        args[0] = util.formatDate(time, this.dateFormat) + ' ' + args[0];
+                    const prefixes = [util.formatDate(time, this.dateFormat)];
+                    if (this.tag) {
+                        prefixes.push((Array.isArray(this.tag) ? this.tag : [this.tag]).join(','));
                     }
-                    const message = formatter.apply(null, args);
-                    this.logger.log(message);
-                    resolve(message);
+                    const formatter = require('util').format;
+                    formatter(...args)
+                        .split('\n')
+                        .forEach(message => {
+                            this.logger.log(`${prefixes.join(' ')} ${message}`);
+                        });
+                    resolve(true);
                 })
-            ;
+                .catch(err => {
+                    console.error(err);
+                    resolve(false);
+                });
         });
     }
 
+    /**
+     * Rotate log file.
+     *
+     * @param {Date|undefined} time Log file creation time
+     * @returns {Promise<undefined>}
+     */
     rotate(time) {
         if (time === undefined) {
             time = new Date();
