@@ -57,13 +57,18 @@ if (data.url) {
         headers.origin = url.origin;
         headers.referer = url.origin;
         process.once('message', data => {
-            if (typeof data === 'object' && data.cookie) {
-                const cookie = Array.isArray(data.cookie) ? data.cookie : [data.cookie];
-                headers.cookie = cookie.join('; ');
-                console.log(`COOKIE: %s`, headers.cookie);
+            if (typeof data === 'object') {
+                if (data.headers) {
+                    Object.assign(headers, data.headers);
+                }
+                if (data.cookie) {
+                    const cookie = Array.isArray(data.cookie) ? data.cookie : [data.cookie];
+                    headers.cookie = cookie.join('; ');
+                    console.log(`COOKIE: %s`, headers.cookie);
+                }
             }
         });
-        process.send({cmd: 'get-cookie', domain: url.hostname, path: url.pathname}, err => {
+        process.send({cmd: 'request', cookie: {domain: url.hostname, path: url.pathname}}, err => {
             if (err) {
                 console.error(err);
             } else {
@@ -78,7 +83,6 @@ if (data.url) {
         const req = http.request(url, options, res => {
             rcode = res.statusCode;
             rheaders = res.headers;
-            res.setEncoding('utf8');
             res.on('data', chunk => {
                 if (typeof chunk === 'string') {
                     chunk = Buffer.from(chunk, 'utf8');
@@ -132,7 +136,7 @@ if (data.url) {
                          *   '/': {Cookie1: 'Value1', Cookie2: 'Value2'
                          * }
                          */
-                        process.send({cmd: 'set-cookie', domain: url.hostname, cookie: cookies});
+                        process.send({cmd: 'response', cookie: {domain: url.hostname, cookie: cookies}});
                     }
                 }
             });
