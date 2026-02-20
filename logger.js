@@ -70,12 +70,14 @@ class Logger extends EventEmitter {
                         prefixes.push((Array.isArray(this.tag) ? this.tag : [this.tag]).join(','));
                     }
                     const logs = [];
+                    const prefix = prefixes.join(' ');
                     const formatter = require('util').format;
                     formatter(...args)
                         .split('\n')
                         .forEach(message => {
+                            message = `${prefix} ${message}`;
+                            this.logger.log(message);
                             logs.push(message);
-                            this.logger.log(`${prefixes.join(' ')} ${message}`);
                         });
                     this.emit('logs', logs);
                     resolve(true);

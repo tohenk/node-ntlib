@@ -1,6 +1,6 @@
 {
   "name": "@ntlab/ntlib",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "A collection of common library",
   "main": "index.js",
   "scripts": {
