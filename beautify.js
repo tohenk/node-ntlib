@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2023-2025 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2023-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,17 +24,19 @@
 
 /**
  * Convert text to lower case then make its first words letter upper case.
+ *
+ * @author Toha <tohenk@yahoo.com>
  */
 class Beautify {
 
     static beautify(s) {
         const res = [];
-        Beautify.split(s).forEach(split => {
+        this.split(s).forEach(split => {
             let value = split[0];
-            if (Beautify.exceptions.indexOf(value) < 0) {
+            if (this.exceptions.indexOf(value) < 0) {
                 let done = false;
-                [Beautify.HIGH, Beautify.NORMAL].forEach(prio => {
-                    Beautify.mutators[prio].forEach(mutator => {
+                [this.HIGH, this.NORMAL].forEach(prio => {
+                    this.mutators[prio].forEach(mutator => {
                         if (mutator.canHandle(value)) {
                             value = mutator.mutate(value);
                             done = true;
@@ -76,28 +78,28 @@ class Beautify {
         return res;
     }
 
-    static addMutator(Mutator, priority = null) {
+    static addMutator(mutator, priority = null) {
         if (null === priority) {
-            priority = Beautify.NORMAL;
+            priority = this.NORMAL;
         }
-        Beautify.mutators[priority].push(Mutator);
+        this.mutators[priority].push(mutator);
     }
 
     static get mutators() {
-        if (Beautify._mutators === undefined) {
-            Beautify._mutators = {
-                [Beautify.HIGH]: [],
-                [Beautify.NORMAL]: []
+        if (this._mutators === undefined) {
+            this._mutators = {
+                [this.HIGH]: [],
+                [this.NORMAL]: []
             }
         }
-        return Beautify._mutators;
+        return this._mutators;
     }
 
     static get exceptions() {
-        if (Beautify._excepts === undefined) {
-            Beautify._excepts = [];
+        if (this._excepts === undefined) {
+            this._excepts = [];
         }
-        return Beautify._excepts;
+        return this._excepts;
     }
 
     static get HIGH() {

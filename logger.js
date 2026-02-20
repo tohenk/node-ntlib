@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2018-2025 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2018-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,13 +24,17 @@
 
 const fs = require('fs');
 const util = require('./util');
+const EventEmitter = require('events');
 
 /**
  * A simple logger.
+ *
+ * @author Toha <tohenk@yahoo.com>
  */
-class Logger {
+class Logger extends EventEmitter {
 
     constructor(filename) {
+        super();
         /** @type {string} */
         this.logfile = filename;
         /** @type {string} */
@@ -65,12 +69,15 @@ class Logger {
                     if (this.tag) {
                         prefixes.push((Array.isArray(this.tag) ? this.tag : [this.tag]).join(','));
                     }
+                    const logs = [];
                     const formatter = require('util').format;
                     formatter(...args)
                         .split('\n')
                         .forEach(message => {
+                            logs.push(message);
                             this.logger.log(`${prefixes.join(' ')} ${message}`);
                         });
+                    this.emit('logs', logs);
                     resolve(true);
                 })
                 .catch(err => {

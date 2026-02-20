@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2025 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2016-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -30,6 +30,14 @@ const path = require('path');
 const fork = require('child_process').fork;
 const util = require('./util');
 
+/**
+ * Execute a command.
+ *
+ * @param {object|string} cmd Command
+ * @param {string} cmd.url URL
+ * @param {object} options Options
+ * @returns {CliExecutor|HttpExecutor}
+ */
 function CommandExecutor(cmd, options) {
     let isHttp = cmd.url !== undefined;
     if (!isHttp && typeof cmd === 'string' &&
@@ -43,6 +51,11 @@ function CommandExecutor(cmd, options) {
     }
 }
 
+/**
+ * Command line executor using spawn.
+ *
+ * @author Toha <tohenk@yahoo.com>
+ */
 class CliExecutor {
 
     bin = null
@@ -129,6 +142,11 @@ class CliExecutor {
     }
 }
 
+/**
+ * HTTP executor using fork.
+ *
+ * @author Toha <tohenk@yahoo.com>
+ */
 class HttpExecutor {
 
     url = null

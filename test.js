@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2025-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,20 @@
 
 const assert = require('node:assert');
 const test = require('node:test');
+const Beautify = require('./beautify');
 const Stringify = require('./stringify');
+
+test('beautify', async (t) => {
+    await t.test('can beautify upper case string', () => {
+        assert.strictEqual(Beautify.beautify('THIS IS THE TEXT'), 'This Is The Text');
+    });
+    await t.test('can beautify lower case string', () => {
+        assert.strictEqual(Beautify.beautify('this is the text'), 'This Is The Text');
+    });
+    await t.test('can beautify mixed case string', () => {
+        assert.strictEqual(Beautify.beautify('THIS is the Text'), 'This Is The Text');
+    });
+});
 
 test('stringify', async (t) => {
     await t.test('can handle non object', () => {

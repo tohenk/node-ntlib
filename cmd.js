@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2025 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2016-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,8 @@
 
 /**
  * Command line utility.
+ *
+ * @author Toha <tohenk@yahoo.com>
  */
 class CmdParser {
 
@@ -35,12 +37,12 @@ class CmdParser {
     register(type, name, shortname, desc, varname, defaultValue) {
         if (!this.cmds[name]) {
             this.cmds[name] = {
-                name: name,
-                shortname: shortname,
+                name,
+                shortname,
                 description: desc,
-                type: type || PARAM_BOOL,
-                value: defaultValue || null,
-                varname: varname || null,
+                type: type || this.PARAM_BOOL,
+                value: defaultValue,
+                varname,
                 accessible: true
             }
             this.lastCmd = name;
@@ -85,12 +87,16 @@ class CmdParser {
         let str, len = 0, _res = [], _cmds = [], _descs = [];
         for (const name in this.cmds) {
             const cmd = this.cmds[name];
-            if (!cmd.accessible) continue;
+            if (!cmd.accessible) {
+                continue;
+            }
             str = this.cmdstr(cmd, false);
             if (cmd.shortname) {
                 str += ', ' + this.cmdstr(cmd, true);
             }
-            if (str.length > len) len = str.length;
+            if (str.length > len) {
+                len = str.length;
+            }
             _cmds.push(str);
             _descs.push(cmd.description);
         }
