@@ -174,8 +174,7 @@ class CmdParser {
             this.args = this.args.slice(1);
         }
         if (err) {
-            console.log(err);
-            console.log('');
+            console.error(err);
         }
         return err ? false : true;
     }

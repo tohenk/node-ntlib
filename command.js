@@ -167,6 +167,9 @@ class HttpExecutor {
             if (config.method) {
                 this.method = config.method;
             }
+            if (config.headers) {
+                this.headers = config.headers;
+            }
             if (config.data !== undefined) {
                 for (const key in config.data) {
                     this.addDefault(key, config.data[key]);
@@ -187,7 +190,8 @@ class HttpExecutor {
         return fork(path.join(__dirname, 'httpcmd'), [JSON.stringify({
             url: this.url,
             method: this.method || 'get',
-            params: params
+            headers: this.headers || {},
+            params
         })], {stdio: ['pipe', 'pipe', 'pipe', 'ipc']});
     }
 

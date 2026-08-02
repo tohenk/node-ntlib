@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2026 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2016-2026 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -34,6 +34,7 @@ if (data.url) {
     const headers = {
         'user-agent': `Node ${process.version}`,
         accept: '*/*',
+        ...(data.headers || {}),
     }
     const method = (data.method || 'GET').toUpperCase();
     const contentType = data.contentType || 'application/x-www-form-urlencoded';
